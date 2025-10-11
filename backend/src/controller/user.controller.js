@@ -82,3 +82,66 @@ export async function sendFriendRequest(req,res) {
     }
     
 }
+
+export async function acceptFriendRequest(req , res) {
+    try {
+        const {id:requestId} = req.params
+        const friendRequest = await FriendRequest.findById(requestId)
+        if (!friendRequest) {
+            return res.status(404).json({message:"friend request not found"})
+        }
+        // verify the current user is the recipient
+
+        if (friendRequest.recipient.toString() !== req.user.id) {
+             return res.status(403).json({message:"you are not authorized to accept this request"})
+        }
+
+        friendRequest.status ="accepted"
+        await friendRequest.save()
+
+        // add each user to the other user friends array
+        await User.findByIdAndUpdate(friendRequest.sender,{
+            $addToSet:{friends:friendRequest.recipient}
+        })
+
+         await User.findByIdAndUpdate(friendRequest.recipient,{
+            $addToSet:{friends:friendRequest.sender}
+        })
+
+    } catch (error) {
+        console.log("error in acceptfriendrequest controller ", error.message);
+        res.status(500).json({message:"internal server error"})
+        
+    }
+}
+
+export async function getOutgoingFriendReqs(req,res) {
+    try {
+        const outgoingRequests = await FriendRequest.find({
+            sender:req.user.id,
+            status: "pending",
+        }).populate("recipient", "fullName profilePic nativeLanguage learningLanguage")
+        res.status(200).json(outgoingRequests)
+    } catch (error) {
+        console.log("error in outgoing friends req controller", error.message);
+        res.status(500).json({message:"internal server error"})
+        
+    }
+}
+
+export async function getFriendRequest(req , res) {
+    try {
+        const incomingReqs = await FriendRequest.find({
+            recipient:req.user.id,
+            status:"pending"
+        }).populate("sender", "fullName , profilePic nativeLanguage, learningLanguage")
+
+         const acceptedReqs = await FriendRequest.find({
+            sender:req.user.id,
+            status:"accepted"
+        }).populate("recipient", "fullName profilePic")
+        res.status(200).json(incomingReqs,acceptedReqs)
+    } catch (error) {
+        
+    }
+}
