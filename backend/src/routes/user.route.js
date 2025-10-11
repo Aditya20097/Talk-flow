@@ -17,4 +17,5 @@ router.get("/friend-requests", getFriendRequest)
 router.get("/outgoing-friend-requests", getOutgoingFriendReqs)
 
 
+
 export default router
