@@ -7,6 +7,7 @@ import OnBoarding from './pages/OnBoarding'
 import NotificationPage from './pages/NotificationPage'
 import ChatPage from './pages/ChatPage'
 import CallPage from './pages/CallPage'
+import  {Toaster} from 'react-hot-toast'
 const App = () => {
   return (
     <div className=' h-screen' data-theme="night">
@@ -18,10 +19,8 @@ const App = () => {
         <Route path='/notification' element ={<NotificationPage/>}/>
         <Route path='/chat' element ={<ChatPage/>}/>
         <Route path='/call' element ={<CallPage/>}/>
-
-        
-        
      </Routes>
+     <Toaster/>
    </div>
   )
 }
