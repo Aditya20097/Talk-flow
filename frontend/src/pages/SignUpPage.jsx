@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import {MessagesSquare, ShipWheelIcon} from 'lucide-react'
 import {Link} from 'react-router'
+import {useMutation} from "@tanstack/react-query"
 
 const SignUpPage = () => {
   const [signupData , setSignupData] = useState({
@@ -8,7 +9,10 @@ const SignUpPage = () => {
     email:"",
     password:""
   })
-  
+
+  const {mutate, isPending , error} = useMutation({})
+
+
   const handleSignup = (e) => {
     e.preventDefault()
   }
