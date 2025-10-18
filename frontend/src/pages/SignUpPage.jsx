@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import {MessagesSquare, ShipWheelIcon} from 'lucide-react'
 import {Link} from 'react-router'
 import {useMutation} from "@tanstack/react-query"
+import {axiosInstance} from "../lib/axios.js"
 
 const SignUpPage = () => {
   const [signupData , setSignupData] = useState({
@@ -10,7 +11,12 @@ const SignUpPage = () => {
     password:""
   })
 
-  const {mutate, isPending , error} = useMutation({})
+  const {mutate, isPending , error} = useMutation({
+    mutationFn: async () => {
+      const response = await axiosInstance.post("/auth/signup", signupData)
+      return response.data
+    }
+  })
 
 
   const handleSignup = (e) => {
