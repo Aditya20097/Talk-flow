@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import {MessagesSquare, ShipWheelIcon} from 'lucide-react'
 import {Link} from 'react-router'
-import {useMutation} from "@tanstack/react-query"
+import {useQueryClient, useMutation} from "@tanstack/react-query"
 import {axiosInstance} from "../lib/axios.js"
+import { signupApi } from '../lib/api.js'
 
 const SignUpPage = () => {
   const [signupData , setSignupData] = useState({
@@ -11,16 +12,17 @@ const SignUpPage = () => {
     password:""
   })
 
-  const {mutate, isPending , error} = useMutation({
-    mutationFn: async () => {
-      const response = await axiosInstance.post("/auth/signup", signupData)
-      return response.data
-    }
+  const queryClient = useQueryClient()
+
+  const {mutate: signupMutation, isPending , error} = useMutation({
+    mutationFn:signupApi,
+    onSuccess : () =>  queryClient.invalidateQueries({ queryKey:["authUser"]})
   })
 
 
   const handleSignup = (e) => {
     e.preventDefault()
+    signupMutation(signupData)
   }
 
 
@@ -34,6 +36,14 @@ const SignUpPage = () => {
         <MessagesSquare className = 'size-9 text-primary'/>
         <span className='text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider'>Talk-Flow</span>
       </div>
+
+        {/* ERROR MESSAGE IF ANY ERROR THERE IS IN SIGNUP FORM */}
+
+        { error && (
+          <div className='alert alert-error mb-4'>
+            <span> {error.response.data.message}</span>
+             </div>
+        )}
 
           <div className='w-full'>
             <form onSubmit={handleSignup} >
@@ -98,7 +108,13 @@ const SignUpPage = () => {
                   </div>
                 </div>
                     <button className='btn btn-primary w-full' type='submit'>
-                        Create Account
+                       {isPending ? (
+                        <>
+                        <span className='loading loading-spinner loading-xs'>Loading...</span>
+                        </>
+                       ) : (
+                        "Create Account"
+                       )}
                     </button>
                     <div className='text-center mt-4'>
                       <p className='text-sm'>Already have an account? {" "}
